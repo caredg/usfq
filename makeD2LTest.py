@@ -43,8 +43,8 @@ from selenium.webdriver.support import expected_conditions as EC
 #These are global variables that can be changed according to needs
 cromedriverloc = '/usr/bin/chromedriver'
 userEmail = "ecarrera@usfq.edu.ec"
-#d2lcourseID = "137997"
-d2lcourseID = "120409"
+d2lcourseID = "137997"
+#d2lcourseID = "120409"
 ##################################################################
 #Don't change this unless there are changes in d2l framework
 d2lloginpage = "https://miusfv.usfq.edu.ec/"
@@ -111,11 +111,13 @@ def reset_EMquestion_driver(driver):
     driver.find_element_by_xpath("//div[@id='d2l-qed-container']").click()
     driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
 
+    return driver
+
 
 #######################################################
 def reset_EM_uploadDialog_driver(driver):
 #######################################################     
-     #This dialog might be the same for all king of questions
+     #This dialog might be the same for all kind of questions
      #that is why I write it separately
      #When it opens, this iframe is unique
      driver.switch_to_default_content()
@@ -139,7 +141,7 @@ def add_EM_answers(driver,nadd):
 def input_EM5_pdfanswers(driver):
 #######################################################
      #reset question page (for html scope reasons)
-     reset_EMquestion_driver(driver)
+     driver = reset_EMquestion_driver(driver)
      #hardcoded limits
      extraans = 1
      defaultanswers = 4
@@ -167,7 +169,7 @@ def input_EM5_pdfanswers(driver):
 ######################################################
 def select_EM5_solution(driver,solution):
 ######################################################
-     reset_EMquestion_driver(driver)
+     driver = reset_EMquestion_driver(driver)
      #get the five choices
      tags = driver.find_elements_by_xpath("//input[@type='checkbox' and contains(@name,'question.response')]")
      #click on the right one
@@ -178,7 +180,7 @@ def select_EM5_solution(driver,solution):
 ######################################################
 def add_EM5_image(driver,imgname):
 #######################################################
-     reset_EMquestion_driver(driver)
+     driver = reset_EMquestion_driver(driver)
      #click on the empty paragraph box
      driver.find_element_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body']").click()
      #click on the camera icon
@@ -193,10 +195,10 @@ def add_EM5_image(driver,imgname):
      #this introduces an input line (otherwise it is not visible)
      #to submit the file.  Give the file
      driver.find_element_by_xpath("//input[@class='d2l-fileinput-input']").send_keys(os.getcwd()+"/"+imgname)
+     sleep(2)
      #click on "Agregar"
      driver.find_element_by_xpath("//div[@class='d2l-dialog-buttons']/button[1]").send_keys("\n")
-
-     #onunload goes to d2l_body so we scope out
+          #onunload goes to d2l_body so we scope out
      driver.switch_to_default_content()
 
      #Fill out the "Proporcionar texto alternativo" with the
@@ -227,7 +229,7 @@ def click_button_crear_nuevo(driver):
 #######################################################
 def save_EM5_pdfquestion(driver):
 #######################################################
-     reset_EMquestion_driver(driver)
+     driver = reset_EMquestion_driver(driver)
      #click on Guardar
      driver.find_element_by_xpath("//button[@name='Submit']").send_keys("\n")
 
