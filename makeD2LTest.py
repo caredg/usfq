@@ -149,7 +149,6 @@ def input_EM5_pdfanswers(driver):
      possible_answers = ["A","B","C","D","E"]
      for i in range(0,defaultanswers):
           mylabel = "qed-option-answer_"+str(i+1)
-          print (mylabel)
           box=driver.find_element_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body' and @id ='"+mylabel+"']")
           box.click()
           box.clear()
@@ -220,23 +219,7 @@ def click_button_crear_nuevo(driver):
      #driver.switch_to_default_content()
      driver.switch_to.frame("ctl_2")
      driver.switch_to.frame("listFrame")
-     #Click on "Crear nuevo".  Select by xpath
-     #https://www.guru99.com/xpath-selenium.html
-
-#     tags = driver.find_elements_by_tag_name('button')
-#     tags2 = driver.find_elements_by_tag_name('div')
-#     print ("**************buttons")
-#     for tag in tags:
-#         print (tag.get_attribute('innerHTML'))
-#         print (tag.get_attribute('class')) 
-#         print ("----")
-#     print ("**************divs")
-#     for tag in tags2:
-#         print (tag.get_attribute('id'))
-#         print (tag.get_attribute('class'))
-#         print ("---")
-#     newQEl=driver.find_element_by_xpath("//*[@id='z_k']")
-
+     #Click on "Crear nuevo".  
      newQEl=driver.find_element_by_xpath("//d2l-dropdown[@class='d2l-button-menu-dropdown d2l-button-group-show']")
      newQEl.click()
      return driver
@@ -371,15 +354,14 @@ def create_d2l_EM5_pdftest(pdffile):
      #but can be improved
      driver.get(d2lcoursenewtestpage)
      print (driver.current_url)
-     #fillout the name of the quiz (it looks like the id is always z_j)
-     #quizNameEl = driver.find_element_by_id('z_j')
+     #fillout the name of the quiz
+     #Select by xpath https://www.guru99.com/xpath-selenium.html
      quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy f-13585-legacy-input-keypress-events']")
      quizNameEl.clear()
      quizNameEl.send_keys(newquizname)
 
      #Click on agregar preguntas, the stupid thing is not clickable
      #so the trick is to give it an enter ("\n") key
-     #qEl = driver.find_element_by_id('z_p')
      qEl = driver.find_element_by_xpath("//button[@class='d2l-button' and contains(text(),'Agregar o editar preguntas')]")
      qEl.send_keys("\n")
      print (driver.current_url)
