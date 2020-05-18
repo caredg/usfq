@@ -330,8 +330,8 @@ def process_pdffile(pdffile):
      os.system("rm -f manifest.txt")
      manif = open("manifest.txt","a")
      for img,sol in pdfDict.items():
-         print (img+" Solution: "+str(sol))
-         manif.write(img+" Solution: "+str(sol))
+         print (img+" Solution: "+str(sol)+"\n")
+         manif.write(img+" Solution: "+str(sol)+"\n")
 
      return pdfDict, baseimgname
      
