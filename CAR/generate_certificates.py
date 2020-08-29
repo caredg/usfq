@@ -15,10 +15,13 @@ talknames = ['Title Talk 1',
              'Title Talk 8',
              'Title Talk 9',
              ]
+#duration of each talk in hours:
+talkhours = [1,1,1,1,1,1,1,1,1]
 #Does the certificate list has a header file to skip?:
 HEADER = True
 #Name of the tex template (no blank spaces)
 PLANTILLATEX = "plantilla_certificado.tex"
+#PLANTILLATEX = "Certificate_template.tex"
 #String to be used in the file names (no blank spaces)
 CERTIFICATETAG = "certifEduCiencia"
 #File with the list of names and talks attended (no blank spaces)
@@ -44,7 +47,7 @@ def insert_the_talks_in_texfile(thetexfile,thetalks):
     os.system("mv "+auxfilename+" "+thetexfile)
     
 #######################################################
-def make_latex_certificate(iname,atalks):
+def make_latex_certificate(iname,atalks,htalks):
 #######################################################
             #remove special characters from iname and then decode it to
         #create name of file stripped from accents (because that's the way
@@ -52,7 +55,7 @@ def make_latex_certificate(iname,atalks):
         tagname = unicodedata.normalize('NFD',''.join(c for c in iname if c.isalnum())).encode('ascii','ignore')
         new_certificate_file = CERTIFICATETAG+"_"+str(tagname,'utf8')+".tex"
         #to replace name in certificate, keep the encoded version
-        sed_str = "sed -e 's#\[NOMBRE\]#"+iname+"#g' "+PLANTILLATEX+">"+new_certificate_file
+        sed_str = "sed -e 's#\[NOMBRE\]#"+iname+"#g' -e 's#\[LASHORAS\]#"+str(htalks)+"#g' "+PLANTILLATEX+">"+new_certificate_file
         os.system(sed_str)
         #take the new tex and insert the talks
         insert_the_talks_in_texfile(new_certificate_file,atalks)
@@ -91,6 +94,8 @@ def make_certificates():
         ntalks =len(italkx)
         #Make a list of the talks that the person has attended:
         atalks = []
+        #Total time in talks
+        htalks = 0
         tidx = 0
         for talk in italkx:
             if not talk:
@@ -98,11 +103,12 @@ def make_certificates():
                 continue
             if talk == "x" or talk == "X":
                 atalks.append(talknames[tidx])
+                htalks +=talkhours[tidx]
                 tidx+=1
             else:
                 print("Warning, the talk field for "+iname+" is not empty but it isn't 'x' or 'X' neither.  Please check ...")
 
-        make_latex_certificate(iname,atalks)
+        make_latex_certificate(iname,atalks,htalks)
                 
 
     
