@@ -1,0 +1,82 @@
+\documentclass{letter}[14pt]
+\usepackage{url}
+\usepackage{marvosym}
+%%%%%%%%%%%%%%spanish
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\decimalpoint
+%
+%\usepackage[latin9]{inputenc}
+\usepackage[utf8]{inputenc}
+%easy access to the Lorem Ipsum dummy text
+\usepackage{lipsum}
+%%%%%%%%%For background image frame
+\usepackage{wallpaper}
+%%%%%%%%%%logos in header and footer
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\pagestyle{empty}
+%stupid geometry
+\usepackage{geometry}
+\geometry{headheight = 0.3in}
+
+%%%%%%%no lines in header
+\renewcommand{\headrulewidth}{0pt}
+%%%%%%% no lines in footer
+\renewcommand{\footrulewidth}{0pt}
+\headsep = 3cm
+\textheight = 615pt
+\voffset=0.5cm
+%%%%modify page style empty to place logos in header
+\fancypagestyle{empty}{\fancyhf{}\fancyhead[C]{\includegraphics[height=1.8in,
+    keepaspectratio=true]{usfq}}}
+
+
+%\fancyfoot[L]{\includegraphics[width=0.8in]{claf}}\fancyfoot[C]{\includegraphics[width=0.8in]{epn}}\fancyfoot[R]{\includegraphics[width=0.8in]{espoch}}}\
+
+
+\signature{
+\footnotesize
+\begin{tabular}{ccccc}
+\hspace{2cm}Edgar Carrera, Ph.D.&\hspace{1.5cm}&&&Andrea Ayala, M.S.\\
+\hspace{2cm}\Letter{\ ecarrera@usfq.edu.ec}&\hspace{1.5cm}&&&\Letter{\ aayala@usfq.edu.ec}\\
+\hspace{2cm}Mentor/Instructor &\hspace{1.5cm}&&&Instructora\\
+\hspace{2cm}Profesor Investigador de Física&\hspace{1.5cm}&&& Profesora de Matemáticas\\
+\hspace{2cm}Universidad San Francisco de Quito&\hspace{1.5cm}&&&Universidad
+San Francisco de Quitob\\
+\end{tabular}
+}
+%\address{Universidad San Francisco de Quito\\Cumbay?Diego de Robles y V?%  Interoce?ca\\Quito, Ecuador\\P.O.BOX:	17-1200-841\\\Telefon{(+593) 2
+%    297-1700} }
+
+\address{\ }
+
+\date{Quito, 30 de marzo 2019}
+%%to move signature to left
+\longindentation=0pt
+\begin{document}
+
+\CenterWallPaper{0.8}{cms_inverted_colorized.png}
+
+\begin{letter}{A Quien Interese:}
+
+\opening{\vspace{0.5cm}Certificamos que\\}
+
+{\centering \Large \bf [NOMBRE]\\}
+\vspace{0.5cm}
+asistió a las charlas\\
+\vspace{0.5cm}
+
+% fill out LASCHARLAS here (do not erase this line)
+
+de la conferencia EduConference.
+
+\lipsum[66]
+
+
+\closing{Atentamente,}
+%\vspace{-1.5cm}
+%\ps{P.S. Here goes your ps.}
+%\encl{Enclosures.}
+\end{letter}
+\end{document}
