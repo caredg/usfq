@@ -5,7 +5,12 @@
 # ecarrera@usfq.edu.ec
 #
 # This script is a robot to create D2L tests.
-# 
+#
+# Oct 15, 2020
+# After D2L upgrade at USFQ, many things got broken. We fixed this and try to
+# avoid using ids that are dynamic
+#
+#
 # May 12, 2020
 # - It needs python 3
 # - Currently it only creates EM tests based on images and answers extracted
@@ -20,7 +25,7 @@
    usage: %prog [options]
    -t, --type = TYPE: Type of D2L exam (currently only EM)
    -f, --file = FILE: Input file (for now only PDF)
-      
+
 """
 
 import os,sys
@@ -43,8 +48,9 @@ from selenium.webdriver.support import expected_conditions as EC
 #These are global variables that can be changed according to needs
 cromedriverloc = '/usr/bin/chromedriver'
 userEmail = "ecarrera@usfq.edu.ec"
-d2lcourseID = "137997"
-#d2lcourseID = "120409"
+#d2lcourseID = "137997" #fermi2020
+#d2lcourseID = "151131" #maestria2020
+d2lcourseID = "120409" #dummy
 ##################################################################
 #Don't change this unless there are changes in d2l framework
 d2lloginpage = "https://miusfv.usfq.edu.ec/"
@@ -103,7 +109,7 @@ def get_password():
 
 #######################################################
 def reset_EMquestion_driver(driver):
-#######################################################     
+#######################################################
     #Need to make the appropiate container active, switch to needed iframe
     #and activate children containers (we add some waiting time, it is needed.  Improve it)
     driver.switch_to_default_content()
@@ -116,7 +122,7 @@ def reset_EMquestion_driver(driver):
 
 #######################################################
 def reset_EM_uploadDialog_driver(driver):
-#######################################################     
+#######################################################
      #This dialog might be the same for all kind of questions
      #that is why I write it separately
      #When it opens, this iframe is unique
@@ -135,7 +141,7 @@ def add_EM_answers(driver,nadd):
           driver.find_element_by_xpath("//d2l-button-subtle[@id='add-option']").click()
 
 
-        
+
 
 #######################################################
 def input_EM5_pdfanswers(driver):
@@ -143,6 +149,7 @@ def input_EM5_pdfanswers(driver):
      #reset question page (for html scope reasons)
      driver = reset_EMquestion_driver(driver)
      #hardcoded limits
+     #D2l presents 4 default answers, we adding one more.
      extraans = 1
      defaultanswers = 4
      #add extra answer
@@ -159,7 +166,7 @@ def input_EM5_pdfanswers(driver):
      #fill out the last one
      sleep(2)
      theboxes = driver.find_elements_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body']")
-     lastbox = theboxes[-1]     
+     lastbox = theboxes[-1]
      lastbox.click()
      lastbox.clear()
      lastbox.send_keys(possible_answers[-1])
@@ -184,7 +191,7 @@ def add_EM5_image(driver,imgname):
      #click on the empty paragraph box
      driver.find_element_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body']").click()
      #click on the camera icon
-     driver.find_element_by_xpath("//button[@id='mceu_58-button']").click()
+     driver.find_element_by_xpath("//div[@aria-label='Agregar imagen']/button[contains(@id,'mceu')]").click()
 
      #switch to upload dialog frame
      reset_EM_uploadDialog_driver(driver)
@@ -198,7 +205,8 @@ def add_EM5_image(driver,imgname):
      sleep(2)
      #click on "Agregar"
      driver.find_element_by_xpath("//div[@class='d2l-dialog-buttons']/button[1]").send_keys("\n")
-          #onunload goes to d2l_body so we scope out
+
+     #onunload goes to d2l_body so we scope out
      driver.switch_to_default_content()
 
      #Fill out the "Proporcionar texto alternativo" with the
@@ -208,22 +216,27 @@ def add_EM5_image(driver,imgname):
      #click on Aceptar
      driver.find_element_by_xpath("//table[@class='d2l-dialog-buttons']//button[@class='d2l-button']").send_keys("\n")
      sleep(2)
-       
+
      return driver
 
 #######################################################
-def click_button_crear_nuevo(driver):
+def click_buttons_agregar_y_nueva_pregunta(driver):
 #######################################################
      #This click is the same for any type of question
-     #Swith to the frame where the magic happens
+     #Switch to the frame where the magic happens
      #Look for similar (in python) as
      #https://www.guru99.com/handling-iframes-selenium.html
-     #driver.switch_to_default_content()
-     driver.switch_to.frame("ctl_2")
-     driver.switch_to.frame("listFrame")
-     #Click on "Crear nuevo".  
-     newQEl=driver.find_element_by_xpath("//d2l-dropdown[@class='d2l-button-menu-dropdown d2l-button-group-show']")
-     newQEl.click()
+     #need to switch to the right frame
+     driver.switch_to_default_content()
+     driver.find_element_by_xpath("//body[@id='d2l_body']")
+     sleep(2)
+     driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
+     sleep(2)
+     #click on 'Agregar'
+     driver.find_element_by_xpath("//d2l-dropdown-button[@id='qed-quiz-builder-add-button']").click()
+     #click on 'Nueva Pregunta'
+     driver.find_element_by_xpath("//d2l-menu-item[contains(@text,'Nueva pregunta')]").click()
+     
      return driver
 
 #######################################################
@@ -240,22 +253,29 @@ def save_EM5_pdfquestion(driver):
 def create_new_EM5_pdfquestion(driver,solution,imgname):
 #######################################################
      #click on crear nuevo
-     driver = click_button_crear_nuevo(driver)
+     sleep(2)
+     driver = click_buttons_agregar_y_nueva_pregunta(driver)
      #click on "Pregunta de eleccion multiple" (EM)
-     EMEl=driver.find_element_by_xpath("//d2l-menu-item[contains(@text,'(EM)')]")
+     #for item in driver.find_elements_by_tag_name("d2l-menu-item"):
+     #    print (item.get_attribute('text'))
+     EMEl=driver.find_element_by_xpath("//d2l-menu-item[contains(@text,'Elección múltiple')]")
+     print("We have chosen type: "+str(EMEl.get_attribute('text')))
+     sleep(2)
      EMEl.click()
-     print (driver.current_url)
-     #Now add answers
+     
+     #Now add answer options
      driver = input_EM5_pdfanswers(driver)
+     #input the correct answer
      driver = select_EM5_solution(driver,solution)
+     #add the image of the problem
      driver = add_EM5_image(driver,imgname)
      driver = save_EM5_pdfquestion(driver)
      sleep(2)
-     print (driver.current_url)
-     
+     #print (driver.current_url)
+
      return driver
 
-#######################################################    
+#######################################################
 def sign_in_d2l(driver):
 #######################################################
      driver.get(d2lloginpage)
@@ -301,7 +321,7 @@ def parse_texfile(baseimgname):
 
      #print (solutions)
      return solutions
-     
+
 #######################################################
 def process_pdffile(pdffile):
 #######################################################
@@ -330,11 +350,11 @@ def process_pdffile(pdffile):
      os.system("rm -f manifest.txt")
      manif = open("manifest.txt","a")
      for img,sol in pdfDict.items():
-         print (img+" Solution: "+str(sol)+"\n")
-         manif.write(img+" Solution: "+str(sol)+"\n")
+         print (img+" Solution: "+str(sol))
+         manif.write(img+" Solution: "+str(sol))
 
      return pdfDict, baseimgname
-     
+
 #######################################################
 def create_d2l_EM5_pdftest(pdffile):
 #######################################################
@@ -346,10 +366,10 @@ def create_d2l_EM5_pdftest(pdffile):
      driver = webdriver.Chrome(cromedriverloc)
      driver.set_window_size(1920, 1000)
      print (driver.get_window_size())
-     
+
      #sign in d2l
      driver = sign_in_d2l(driver)
-     
+
      #access the new quiz page in the current course
      #I could have clicked in the button, but I was lazy.
      #As long as the url does not change, it will not break
@@ -358,7 +378,7 @@ def create_d2l_EM5_pdftest(pdffile):
      print (driver.current_url)
      #fillout the name of the quiz
      #Select by xpath https://www.guru99.com/xpath-selenium.html
-     quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy f-13585-legacy-input-keypress-events']")
+     quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy']")
      quizNameEl.clear()
      quizNameEl.send_keys(newquizname)
 
@@ -366,7 +386,7 @@ def create_d2l_EM5_pdftest(pdffile):
      #so the trick is to give it an enter ("\n") key
      qEl = driver.find_element_by_xpath("//button[@class='d2l-button' and contains(text(),'Agregar o editar preguntas')]")
      qEl.send_keys("\n")
-     print (driver.current_url)
+     #print (driver.current_url)
 
      #now we have to loop in order to add multiple elective questions
      #solution has to be from 0 to 4
@@ -378,7 +398,7 @@ def create_d2l_EM5_pdftest(pdffile):
 
      #driver.save_screenshot("screenshot.png")
 
-     
+
 
 
 #######################################################
@@ -399,19 +419,19 @@ def get_default_options(option):
          exit(1)
     else:
         dicOpt['file'] = option.file
-        
 
-    return dicOpt     
+
+    return dicOpt
 
 ###############################################################
 def main():
-###############################################################     
+###############################################################
     #import optionparser
     option,args = parse(__doc__)
     if not args and not option:
         print ("The script was not configured properly")
         exit(0)
-        
+
     #set default options
     dicOpt = get_default_options(option)
 
@@ -435,10 +455,15 @@ def main():
     #create_d2l_EM5test(pdffile)
     create_d2l_EM5_pdftest(thepdffile)
 
-    
-    
+
+
 #######################################################
 if __name__ =='__main__':
 #######################################################
      sys.exit(main())
-    
+
+
+# for div in driver.find_elements_by_tag_name('div'):
+#        print (div.get_attribute('id'))
+
+#driver.save_screenshot("screenshot.png")
