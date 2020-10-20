@@ -4,14 +4,14 @@
 # Edgar Carrera
 # ecarrera@usfq.edu.ec
 #
-# This script is a robot to create D2L tests.
+# This script is a robot to create D2L tests at USFQ.
 #
 # Oct 19, 2020
 # Updated the parser to work with random problem generation from Latex
 # package probsoln.  We basically need:
 # -The PDF file in a one problem per page format: e.g, ExamenMaestriaA.pdf
 #  This file should have the problems labels at the end, e.g., mecanica::05,
-#  which corresponds to its associated text files from where we extract the
+#  which corresponds to its associated tex files from where we extract the
 #  answers
 # -All the tex files like mecanica.tex, ondas.tex, etc., where the solutions
 # will be extracted
@@ -47,10 +47,11 @@ import subprocess
 import io
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.action_chains import ActionChains
+#from selenium.webdriver.support.ui import Select
+#from selenium.webdriver.common.action_chains import ActionChains
 import getpass
 from time import gmtime, localtime, strftime, sleep
+import datetime
 from difflib import SequenceMatcher
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -61,8 +62,9 @@ from selenium.webdriver.support import expected_conditions as EC
 cromedriverloc = '/usr/bin/chromedriver'
 userEmail = "ecarrera@usfq.edu.ec"
 #d2lcourseID = "137997" #fermi2020
-d2lcourseID = "151131" #maestria2020
-#d2lcourseID = "120409" #dummy
+#d2lcourseID = "151131" #maestria2020
+d2lcourseID = "120409" #dummy
+theppi = 300 #density for images
 stringA = "ParteA"
 stringB = "ParteB"
 labelsA = ['mecanica::',
@@ -184,12 +186,13 @@ def input_EM5_pdfanswers(driver):
      for i in range(0,defaultanswers):
           mylabel = "qed-option-answer_"+str(i+1)
           box=driver.find_element_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body' and @id ='"+mylabel+"']")
+          sleep(1)
           box.click()
           box.clear()
           box.send_keys(possible_answers[i])
 
      #fill out the last one
-     sleep(3)
+     sleep(5)
      theboxes = driver.find_elements_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body']")
      lastbox = theboxes[-1]
      lastbox.click()
@@ -398,7 +401,7 @@ def process_pdffile(pdffile):
      #make images out of pdf file
      baseimgname = pdffile.split(".")[0]
      os.system("rm -f "+baseimgname+"_*.png")
-     str_conv = "convert -density 150 -trim "+ pdffile+" -quality 100 -scene 1 "+baseimgname+"_%02d.png"
+     str_conv = "convert -density "+str(theppi)+" -trim "+ pdffile+" -quality 100 -scene 1 "+baseimgname+"_%02d.png"
      os.system(str_conv)
      #convert pdf to text file
      os.system("rm -f "+baseimgname+".txt")
@@ -499,6 +502,10 @@ def get_default_options(option):
 ###############################################################
 def main():
 ###############################################################
+    #print time
+    now = datetime.datetime.now()
+    print ("Current date and time : ")
+    print (now.strftime("%Y-%m-%d %H:%M:%S"))
     #import optionparser
     option,args = parse(__doc__)
     if not args and not option:
@@ -522,12 +529,16 @@ def main():
         sys.exit(1)
 
     #create D2L EM test with 5 options from pdf file
-    #The pdf file has to have an associated tex file
+    #The pdf file has to have associated tex files
     #so we can extract the correct answers
     #pdffile: plain pdffile with 1 question per page.
     #create_d2l_EM5test(pdffile)
     create_d2l_EM5_pdftest(thepdffile)
-
+    
+    #print time
+    now = datetime.datetime.now()
+    print ("Current date and time : ")
+    print (now.strftime("%Y-%m-%d %H:%M:%S"))
 
 
 #######################################################
