@@ -16,8 +16,10 @@
 # -All the tex files like mecanica.tex, ondas.tex, etc., where the solutions
 # will be extracted
 # To execute do something like
-# $> python makeD@LTestFromProbSoln.py -t EM -f ExamenMaestriaA.pdf
+# $> python makeD@LTestFromProbSoln.py -t EM -f ExamenMaestriaParteA.pdf
 #
+# It needs to have ParteA or ParteB in the name.
+
 # Oct 15, 2020
 # After D2L upgrade at USFQ, many things got broken. We fixed this and tried
 # to avoid using ids that are dynamic (we are still lazy with a few things)
@@ -62,19 +64,14 @@ from selenium.webdriver.support import expected_conditions as EC
 cromedriverloc = '/usr/bin/chromedriver'
 userEmail = "ecarrera@usfq.edu.ec"
 #d2lcourseID = "137997" #fermi2020
-#d2lcourseID = "151131" #maestria2020
-d2lcourseID = "120409" #dummy
+#d2lcourseID = "141761" #qm
+d2lcourseID = "156664" #hep
+#d2lcourseID = "120409" #dummy
 theppi = 300 #density for images
-stringA = "ParteA"
+stringA = "prueba1"
 stringB = "ParteB"
-labelsA = ['mecanica::',
-                'electromagnetismo::',
-                'ondas::',
-                'termodinamica::',
-                'calculo::',
-                'multivariable::',
-                'algebralineal::',
-                'ODE::']
+labelsA = ['particles::']
+           
 labelsB = ['moderna::',
            'metodos::',
            'compleja::']
@@ -139,11 +136,14 @@ def reset_EMquestion_driver(driver):
 #######################################################
     #Need to make the appropiate container active, switch to needed iframe
     #and activate children containers (we add some waiting time, it is needed.  Improve it)
-    driver.switch_to_default_content()
+    driver.switch_to.default_content()
     driver.implicitly_wait(25)
-    driver.find_element_by_xpath("//div[@id='d2l-qed-container']").click()
-    driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
-
+    #for item in driver.find_elements_by_tag_name("iframe"):
+    #     print (item.get_attribute('title'))
+    #exit(1)
+    #driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
+    driver.switch_to.frame(driver.find_element_by_xpath("//iframe[@title='Question Editor']"))
+    #driver.save_screenshot("screenshot6.png")
     return driver
 
 
@@ -153,7 +153,7 @@ def reset_EM_uploadDialog_driver(driver):
      #This dialog might be the same for all kind of questions
      #that is why I write it separately
      #When it opens, this iframe is unique
-     driver.switch_to_default_content()
+     driver.switch_to.default_content()
      ifEl = driver.find_element_by_xpath("//iframe[@class='d2l-dialog-frame']")
      driver.switch_to.frame(ifEl)
 
@@ -165,9 +165,9 @@ def add_EM_answers(driver,nadd):
      #sometimes this page does not load rapidly
      sleep(3)
      for i in range(1,nadd+1):
-          driver.find_element_by_xpath("//d2l-button-subtle[@id='add-option']").click()
+         driver.find_element_by_xpath("//d2l-button-subtle[@id='add-option']").click()
 
-
+     return driver
 
 
 #######################################################
@@ -180,11 +180,13 @@ def input_EM5_pdfanswers(driver):
      extraans = 1
      defaultanswers = 4
      #add extra answer
-     add_EM_answers(driver,extraans)
+     driver=add_EM_answers(driver,extraans)
      #Now fill out the answers
      possible_answers = ["A","B","C","D","E"]
      for i in range(0,defaultanswers):
+          #print ("Building answer",i)
           mylabel = "qed-option-answer_"+str(i+1)
+          #print (mylabel)
           box=driver.find_element_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body' and @id ='"+mylabel+"']")
           sleep(1)
           box.click()
@@ -230,13 +232,12 @@ def add_EM5_image(driver,imgname):
      #this introduces an input line (otherwise it is not visible)
      #to submit the file.  Give the file
      driver.find_element_by_xpath("//input[@class='d2l-fileinput-input']").send_keys(os.getcwd()+"/"+imgname)
-     sleep(3)
+     sleep(4)
      #click on "Agregar"
      driver.find_element_by_xpath("//div[@class='d2l-dialog-buttons']/button[1]").send_keys("\n")
 
      #onunload goes to d2l_body so we scope out
-     driver.switch_to_default_content()
-
+     driver.switch_to.default_content()
      #Fill out the "Proporcionar texto alternativo" with the
      #name of the file without extension
      driver.find_element_by_xpath("//input[contains(@id,'d2l_cntl') and @type='text']").send_keys(imgname.split(".")[0])
@@ -255,16 +256,17 @@ def click_buttons_agregar_y_nueva_pregunta(driver):
      #Look for similar (in python) as
      #https://www.guru99.com/handling-iframes-selenium.html
      #need to switch to the right frame
-     driver.switch_to_default_content()
-     driver.find_element_by_xpath("//body[@id='d2l_body']")
-     sleep(3)
-     driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
+     #driver.switch_to.default_content()
+     driver = reset_EMquestion_driver(driver)
+     #driver.switch_to.parent_frame()
+     #driver.find_element_by_xpath("//body[@id='d2l_body']")
+     #driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
      sleep(3)
      #click on 'Agregar'
      driver.find_element_by_xpath("//d2l-dropdown-button[@id='qed-quiz-builder-add-button']").click()
+     sleep(3)
      #click on 'Nueva Pregunta'
      driver.find_element_by_xpath("//d2l-menu-item[contains(@text,'Nueva pregunta')]").click()
-     
      return driver
 
 #######################################################
@@ -272,7 +274,10 @@ def save_EM5_pdfquestion(driver):
 #######################################################
      driver = reset_EMquestion_driver(driver)
      #click on Guardar
+     sleep(3)
      driver.find_element_by_xpath("//button[@name='Submit']").send_keys("\n")
+     #driver.save_screenshot("screenshot1.png")
+
 
      return driver
 
@@ -280,6 +285,7 @@ def save_EM5_pdfquestion(driver):
 #######################################################
 def create_new_EM5_pdfquestion(driver,solution,imgname):
 #######################################################
+     #print (driver.current_url)
      #click on crear nuevo
      sleep(2)
      driver = click_buttons_agregar_y_nueva_pregunta(driver)
@@ -296,7 +302,9 @@ def create_new_EM5_pdfquestion(driver,solution,imgname):
      #input the correct answer
      driver = select_EM5_solution(driver,solution)
      #add the image of the problem
+     sleep(2)
      driver = add_EM5_image(driver,imgname)
+     sleep(2)
      driver = save_EM5_pdfquestion(driver)
      sleep(2)
      #print (driver.current_url)
@@ -326,6 +334,7 @@ def sign_in_d2l(driver):
 #######################################################
 def cat_tex_files(baseimgname):
 #######################################################
+    print ("Concatenating tex files ...")
     os.system("rm -f "+baseimgname+".tex")
     #use awk to concatenate due to new line after each
     #file issue
@@ -347,6 +356,7 @@ def cat_tex_files(baseimgname):
 #######################################################
 def parse_texfile(baseimgname):
 #######################################################
+     print ("Parsing tex file "+baseimgname)
      #cat all the tex base files into just one tex file
      cat_tex_files(baseimgname)
      #decide what type of label files to use, A or B
@@ -377,9 +387,9 @@ def parse_texfile(baseimgname):
                  withinQ = True
                  probIdx =examlabels.index(label)+1
                  solIdx=-1
-         if ("\\incorrectitem" in line and withinQ):
+         if ("\\choice" in line and withinQ):
              solIdx +=1
-         if ("\\correctitem" in line and withinQ):
+         if ("\\CorrectChoice" in line and withinQ):
              solIdx +=1
              solutions[probIdx] = solIdx
          if ("\\end{defproblem}" in line  and withinQ):
@@ -397,6 +407,7 @@ def parse_texfile(baseimgname):
 #######################################################
 def process_pdffile(pdffile):
 #######################################################
+     print("Processing pdf file....")
      pdfDict = {}
      #make images out of pdf file
      baseimgname = pdffile.split(".")[0]
@@ -410,6 +421,7 @@ def process_pdffile(pdffile):
      #parse associated tex file for correct answers
      solDict = parse_texfile(baseimgname)
      probkeys = list(solDict.keys())
+     print (probkeys)
      #make a dictionary image:solution
      str_ls = "ls -1 "+baseimgname+"_*.png"
      mypipe = subprocess.Popen(str_ls,shell=True,stdout=subprocess.PIPE)
@@ -438,6 +450,7 @@ def create_d2l_EM5_pdftest(pdffile):
      #first deal with the pdffile
      #create a dictionary [image:solution]
      pdfDict, newquizname  = process_pdffile(pdffile)
+     #exit(0)
      #create a selenium driver
      driver = webdriver.Chrome(cromedriverloc)
      driver.set_window_size(1920, 1000)
@@ -451,10 +464,10 @@ def create_d2l_EM5_pdftest(pdffile):
      #As long as the url does not change, it will not break
      #but can be improved
      driver.get(d2lcoursenewtestpage)
-     print (driver.current_url)
-     #fillout the name of the quiz
+          #fillout the name of the quiz
      #Select by xpath https://www.guru99.com/xpath-selenium.html
-     quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy']")
+     #quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy']")
+     quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy rs_skip']")
      quizNameEl.clear()
      quizNameEl.send_keys(newquizname)
 
@@ -462,8 +475,7 @@ def create_d2l_EM5_pdftest(pdffile):
      #so the trick is to give it an enter ("\n") key
      qEl = driver.find_element_by_xpath("//button[@class='d2l-button' and contains(text(),'Agregar o editar preguntas')]")
      qEl.send_keys("\n")
-     #print (driver.current_url)
-
+     
      #now we have to loop in order to add multiple elective questions
      #solution has to be from 0 to 4
      probIdx = 1
