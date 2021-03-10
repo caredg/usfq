@@ -6,6 +6,11 @@
 #
 # This script is a robot to create D2L tests at USFQ.
 #
+# March 1, 2021
+# There were a few changes in some handles in d2l and also new syntax in
+# Selenium.  I updated it so it keeps working. No major changes.
+#
+#
 # Oct 19, 2020
 # Updated the parser to work with random problem generation from Latex
 # package probsoln.  We basically need:
