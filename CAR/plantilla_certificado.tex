@@ -1,0 +1,94 @@
+\documentclass{letter}[26pt]
+\usepackage{url}
+\usepackage{marvosym}
+%%%%%%%%%%%%%%spanish
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\decimalpoint
+%
+%\usepackage[latin9]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%easy access to the Lorem Ipsum dummy text
+\usepackage{lipsum}
+%%%%%%%%%For background image frame
+\usepackage{wallpaper}
+\addtolength{\wpYoffset}{1cm}
+%%%%%%%%%%logos in header and footer
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\pagestyle{empty}
+%stupid geometry
+%\usepackage{geometry}
+%\geometry{headheight = 0.3in}
+
+%%%%%%%no lines in header
+%\renewcommand{\headrulewidth}{0pt}
+%%%%%%% no lines in footer
+%\renewcommand{\footrulewidth}{0pt}
+%\headsep = 3cm
+%\textheight = 615pt
+%\voffset=0.5cm
+%%%%modify page style empty to place logos in header
+%\fancypagestyle{empty}{\fancyhf{}\fancyhead[C]{\includegraphics[height=1.8in,
+%    keepaspectratio=true]{usfq}}}
+
+
+%\fancyfoot[L]{\includegraphics[width=0.8in]{claf}}\fancyfoot[C]{\includegraphics[width=0.8in]{epn}}\fancyfoot[R]{\includegraphics[width=0.8in]{espoch}}}\
+%nice geometry
+\usepackage[a4paper,left=2.cm, right=3.cm, top=2.5cm, bottom=2cm]{geometry}
+%font catalogue
+%\usepackage{tgbonum}
+\usepackage[bitstream-charter]{mathdesign}
+%\usepackage{tgheros}
+%\usepackage{tgadventor}
+
+
+\signature{
+\footnotesize
+\begin{tabular}{ccccc}
+\includegraphics[width=0.3\textwidth]{FIRMAANDREAAYALA_a.png}&\hspace{1.5cm}&\includegraphics[width=0.3\textwidth]{FIRMANELSONMORAN_a.png}&\hspace{1.5cm}&\includegraphics[width=0.3\textwidth]{FIRMAGISELLEURRESTA_a.png}\\
+Andrea Ayala&\hspace{1.5cm}&Nelson Morán&\hspace{1.5cm}&Giselle Urresta\\
+Coordinadora
+CAR&\hspace{1.5cm}&Director Distrital
+Loreto-Orellana&\hspace{1.5cm}&Coordinadora LAN Responsabilidad Social\\
+Universidad San Francisco de
+Quito&\hspace{1.5cm}&Ministerio de Educación&\hspace{1.5cm}&SEED-Schlumberger\\
+\end{tabular}
+}
+%\address{Universidad San Francisco de Quito\\Cumbay?Diego de Robles y V?%  Interoce?ca\\Quito, Ecuador\\P.O.BOX:	17-1200-841\\\Telefon{(+593) 2
+%    297-1700} }
+
+\address{\ }
+
+\date{Quito, 18 de septiembre del 2020}
+%%to move signature to left
+\longindentation=0pt
+\begin{document}
+
+\CenterWallPaper{1.0}{fondo_oficial}
+
+\begin{letter}{El programa Ciencia al Rescate de la Universidad San Francisco de Quito,
+    SEED-Schlumberger y el Ministerio de Educación - Distrito de Loreto
+    certifican que: }
+
+\opening{\vspace{0.5cm}}
+
+{\centering \Huge \bf [NOMBRE]\\}
+\vspace{0.5cm}
+asistió a las charlas\\
+\vspace{0.5cm}
+
+% fill out LASCHARLAS here (do not erase this line)
+\vspace{0.5cm}
+del ciclo de conferencias virtuales {\bf Educación en Ciencia 2020},
+realizado desde el 19 de agosto hasta el 15 de septiembre del 2020 con una
+carga horaria de {\bf [LASHORAS]} hora(s).
+\vspace{0.5cm}
+
+\closing{Atentamente,}
+%\vspace{-1.5cm}
+%\ps{P.S. Here goes your ps.}
+%\encl{Enclosures.}
+\end{letter}
+\end{document}
