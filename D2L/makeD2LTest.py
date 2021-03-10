@@ -6,6 +6,10 @@
 #
 # This script is a robot to create D2L tests.
 #
+# March 9, 2021
+# There were a few changes in some handles in d2l and also new syntax in
+# Selenium.  I updated it so it keeps working. No major changes.
+#
 # Oct 15, 2020
 # After D2L upgrade at USFQ, many things got broken. We fixed this and try to
 # avoid using ids that are dynamic
@@ -48,6 +52,7 @@ from selenium.webdriver.support import expected_conditions as EC
 #These are global variables that can be changed according to needs
 cromedriverloc = '/usr/bin/chromedriver'
 userEmail = "ecarrera@usfq.edu.ec"
+theppi = 300 #density for images
 #d2lcourseID = "137997" #fermi2020
 #d2lcourseID = "151131" #maestria2020
 d2lcourseID = "120409" #dummy
@@ -112,11 +117,11 @@ def reset_EMquestion_driver(driver):
 #######################################################
     #Need to make the appropiate container active, switch to needed iframe
     #and activate children containers (we add some waiting time, it is needed.  Improve it)
-    driver.switch_to_default_content()
+    driver.switch_to.default_content()
     driver.implicitly_wait(25)
-    driver.find_element_by_xpath("//div[@id='d2l-qed-container']").click()
-    driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
-
+    #driver.find_element_by_xpath("//div[@id='d2l-qed-container']").click()
+    #driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
+    driver.switch_to.frame(driver.find_element_by_xpath("//iframe[@title='Question Editor']"))
     return driver
 
 
@@ -126,7 +131,7 @@ def reset_EM_uploadDialog_driver(driver):
      #This dialog might be the same for all kind of questions
      #that is why I write it separately
      #When it opens, this iframe is unique
-     driver.switch_to_default_content()
+     driver.switch_to.default_content()
      ifEl = driver.find_element_by_xpath("//iframe[@class='d2l-dialog-frame']")
      driver.switch_to.frame(ifEl)
 
@@ -136,11 +141,12 @@ def reset_EM_uploadDialog_driver(driver):
 def add_EM_answers(driver,nadd):
 #######################################################
      #sometimes this page does not load rapidly
-     sleep(2)
+     sleep(3)
      for i in range(1,nadd+1):
           driver.find_element_by_xpath("//d2l-button-subtle[@id='add-option']").click()
 
 
+     return driver
 
 
 #######################################################
@@ -153,18 +159,19 @@ def input_EM5_pdfanswers(driver):
      extraans = 1
      defaultanswers = 4
      #add extra answer
-     add_EM_answers(driver,extraans)
+     driver=add_EM_answers(driver,extraans)
      #Now fill out the answers
      possible_answers = ["A","B","C","D","E"]
      for i in range(0,defaultanswers):
           mylabel = "qed-option-answer_"+str(i+1)
           box=driver.find_element_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body' and @id ='"+mylabel+"']")
+          sleep(1)
           box.click()
           box.clear()
           box.send_keys(possible_answers[i])
 
      #fill out the last one
-     sleep(2)
+     sleep(4)
      theboxes = driver.find_elements_by_xpath("//div[@class='d2l-richtext-editor-container mce-content-body']")
      lastbox = theboxes[-1]
      lastbox.click()
@@ -202,12 +209,12 @@ def add_EM5_image(driver,imgname):
      #this introduces an input line (otherwise it is not visible)
      #to submit the file.  Give the file
      driver.find_element_by_xpath("//input[@class='d2l-fileinput-input']").send_keys(os.getcwd()+"/"+imgname)
-     sleep(2)
+     sleep(3)
      #click on "Agregar"
      driver.find_element_by_xpath("//div[@class='d2l-dialog-buttons']/button[1]").send_keys("\n")
 
      #onunload goes to d2l_body so we scope out
-     driver.switch_to_default_content()
+     driver.switch_to.default_content()
 
      #Fill out the "Proporcionar texto alternativo" with the
      #name of the file without extension
@@ -226,14 +233,11 @@ def click_buttons_agregar_y_nueva_pregunta(driver):
      #Switch to the frame where the magic happens
      #Look for similar (in python) as
      #https://www.guru99.com/handling-iframes-selenium.html
-     #need to switch to the right frame
-     driver.switch_to_default_content()
-     driver.find_element_by_xpath("//body[@id='d2l_body']")
-     sleep(2)
-     driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
-     sleep(2)
+     driver = reset_EMquestion_driver(driver)
+     sleep(3)
      #click on 'Agregar'
      driver.find_element_by_xpath("//d2l-dropdown-button[@id='qed-quiz-builder-add-button']").click()
+     sleep(3)
      #click on 'Nueva Pregunta'
      driver.find_element_by_xpath("//d2l-menu-item[contains(@text,'Nueva pregunta')]").click()
      
@@ -244,6 +248,7 @@ def save_EM5_pdfquestion(driver):
 #######################################################
      driver = reset_EMquestion_driver(driver)
      #click on Guardar
+     sleep(3)
      driver.find_element_by_xpath("//button[@name='Submit']").send_keys("\n")
 
      return driver
@@ -268,7 +273,9 @@ def create_new_EM5_pdfquestion(driver,solution,imgname):
      #input the correct answer
      driver = select_EM5_solution(driver,solution)
      #add the image of the problem
+     sleep(2)
      driver = add_EM5_image(driver,imgname)
+     sleep(2)
      driver = save_EM5_pdfquestion(driver)
      sleep(2)
      #print (driver.current_url)
@@ -329,7 +336,7 @@ def process_pdffile(pdffile):
      #make images out of pdf file
      baseimgname = pdffile.split(".")[0]
      os.system("rm -f "+baseimgname+"_*.png")
-     str_conv = "convert -density 150 -trim "+ pdffile+" -quality 100 -scene 1 "+baseimgname+"_%02d.png"
+     str_conv = "convert -density "+str(theppi)+" -trim "+ pdffile+" -quality 100 -scene 1 "+baseimgname+"_%02d.png"
      os.system(str_conv)
      #parse associated tex file for correct answers
      solDict = parse_texfile(baseimgname)
@@ -378,7 +385,7 @@ def create_d2l_EM5_pdftest(pdffile):
      print (driver.current_url)
      #fillout the name of the quiz
      #Select by xpath https://www.guru99.com/xpath-selenium.html
-     quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy']")
+     quizNameEl = driver.find_element_by_xpath("//input[@class='d2l-edit d2l-edit-legacy rs_skip']")
      quizNameEl.clear()
      quizNameEl.send_keys(newquizname)
 
