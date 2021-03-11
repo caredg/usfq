@@ -1,0 +1,99 @@
+\documentclass{letter}[14pt]
+\usepackage{url}
+\usepackage{marvosym}
+%%%%%%%%%%%%%%spanish
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\decimalpoint
+%
+\usepackage[utf8]{inputenc}
+%\usepackage[utf8]{inputenc}
+%%%%%%%hanle list in csv
+%\usepackage{datatool}
+% Load database 'names' from file 'namelist.csv'
+%\DTLloaddb{names}{lista_certificados.csv}
+%%%%%%%%%For background image frame
+\usepackage{wallpaper}
+%%%%%%%%%%logos in header and footer
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\pagestyle{empty}
+%stupid geometry
+\usepackage{geometry}
+\geometry{headheight = 0.3in}
+%%%%%%%no lines in header
+\renewcommand{\headrulewidth}{0pt}
+%%%%%%% no lines in footer
+\renewcommand{\footrulewidth}{0pt}
+\headsep = 3cm
+\textheight = 615pt
+\voffset=0.5cm
+%%%%modify page style empty to place logos in header
+\fancypagestyle{empty}{\fancyhf{}\fancyhead[C]{\includegraphics[height=1.8in,
+    keepaspectratio=true]{usfq}}}
+
+
+%\fancyfoot[L]{\includegraphics[width=0.8in]{claf}}\fancyfoot[C]{\includegraphics[width=0.8in]{epn}}\fancyfoot[R]{\includegraphics[width=0.8in]{espoch}}}\
+
+
+\signature{
+\footnotesize
+\begin{tabular}{ccccc}
+\includegraphics[width=0.3\textwidth]{signature.jpg}&\hspace{1.5cm}&&&\includegraphics[width=0.3\textwidth]{FIRMAANDREAAYALA_a.png}\\
+\hspace{2cm}Edgar Carrera, Ph.D.&\hspace{1.5cm}&&&Andrea Ayala, M.S.\\
+\hspace{2cm}\Letter{\ ecarrera@usfq.edu.ec}&\hspace{1.5cm}&&&\Letter{\ aayala@usfq.edu.ec}\\
+\hspace{2cm}Mentor/Instructor &\hspace{1.5cm}&&&Instructora\\
+\hspace{2cm}Profesor Investigador de Física&\hspace{1.5cm}&&& Profesora de Matemáticas\\
+\hspace{2cm}Universidad San Francisco de Quito&\hspace{1.5cm}&&&Universidad
+San Francisco de Quitob\\
+\end{tabular}
+}
+%\address{Universidad San Francisco de Quito\\Cumbayá, Diego de Robles y Vía
+%  Interoceánica\\Quito, Ecuador\\P.O.BOX:	17-1200-841\\\Telefon{(+593) 2
+%    297-1700} }
+
+\address{\ }
+
+\date{Quito, 5 de marzo 2021}
+%%to move signature to left
+\longindentation=0pt
+\begin{document}
+
+\CenterWallPaper{0.8}{cms_inverted_colorized.png}
+
+\begin{letter}{A Quien Interese:}
+
+\opening{\vspace{0.5cm}Certificamos que\\}
+
+{\centering \Large \bf [Nombre]\\}
+\vspace{0.5cm}
+participó en el {\bf CMS Masterclass Quito 2021} organizado por la Red Quarknet y la Universidad San Francisco de Quito (USFQ).  El evento
+tuvo lugar en el campus virtual de la USFQ, en Quito-Ecuador,
+durante el miércoles 3 y jueves 4 de marzo de 2021.
+
+Este es un evento realizado en conjunto con el laboratorio CERN, Fermilab y diferentes
+universidades a nivel mundial.  Está orientado a dar a conocer a los
+estudiantes de colegio el trabajo que se realiza en estos centros de investigación. El
+International Masterclass, del cual el CMS Masterclass es parte, es organizado por TU Dresden y QuarkNet Notre Dame en
+cooperación con el IPPOG (International Particle Physics Outreach Group), con el fin de promover la ciencia.
+
+El CMS Masterclass tuvo una duración de 4 horas.  A continuación se detallan
+las actividades realizadas:
+
+\begin{itemize}
+\item Charla sobre el experimento CMS, LHC y CERN (30 min)
+\item Uso del laboratorio en línea i-Spy (1 hora)
+\item Análisis de datos del experimento CMS utilizando i-Spy y CIMA(1 hora)
+\item Discusión de resultados (30 min)
+\item Presentación de resultados en videoconferencia con el laboratorio Fermilab (1 hora)
+\end{itemize}
+
+
+
+%\vspace{1.3cm}
+\closing{Atentamente,}
+%\vspace{-1.5cm}
+%\ps{P.S. Here goes your ps.}
+%\encl{Enclosures.}
+\end{letter}
+\end{document}
