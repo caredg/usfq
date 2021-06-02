@@ -35,6 +35,8 @@ import subprocess
 import bibtexparser
 import io
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 import getpass
@@ -323,11 +325,8 @@ def scrape_the_hubi(theDriver):
 def get_hubi_publication_dictionary():
 #######################################################
 
-     #create a phantom webdriver
-     #driver = webdriver.PhantomJS()
-     driver = webdriver.Chrome(cromedriverloc)
-#     driver.set_window_size(1120, 550)
-
+     s=Service(ChromeDriverManager().install())
+     driver = webdriver.Chrome(service=s)
      #sign in hubi
      driver.get(indexPageURL)
      userEl = driver.find_element_by_id('usuario')
@@ -340,6 +339,8 @@ def get_hubi_publication_dictionary():
      driver.find_element_by_class_name("submit").click()
      print (driver.current_url)
      assert driver.current_url == mainPageURL
+
+     exit(0)
      
      #make sure you get access to the publications list
      driver.get(mainPHPURL)
