@@ -4,10 +4,14 @@
 # Edgar Carrera
 # ecarrera@cern.ch
 #
-# August 8, 2017
-# Script to extract a publication list from hep inspire,
-# compare it to hubi (usfq) and generate a list
-# of already uploaded publications and publication pending upload
+#  June 17, 2021
+#  Changed the way webdriver access chrome.  No service now, it is simpler.
+#  Now we just parse the hubi report file to get the dictionary which will have only id and doi
+#  
+#
+# Jun 9, 2020
+# Year refers to year in "date year" in the inspire search string
+# I removed the option to additional strings as I never use it.
 #
 # May 31, 2020
 # Inspire already switched to a new site
@@ -17,9 +21,11 @@
 # sintax in the inspire literatur search window:
 # a E.Carrera.Jarrin.1 and tc p and date 2019
 #
-# Jun 9, 2020
-# Year refers to year in "date year" in the inspire search string
-# I removed the option to additional strings as I never use it.
+# August 8, 2017
+# Script to extract a publication list from hep inspire,
+# compare it to hubi (usfq) and generate a list
+# of already uploaded publications and publication pending upload
+#
 ############################################################################
 
 """
@@ -27,7 +33,7 @@
    -y, --jyear = JYEAR: journal year of publication
 
 """
-
+import csv
 import os,sys
 import string, re
 import fileinput
@@ -44,21 +50,28 @@ from time import gmtime, localtime, strftime, sleep
 from difflib import SequenceMatcher
 
 #location of chromedriver
-cromedriverloc = '/usr/bin/chromedriver'
+#cromedriverloc = '/usr/bin/chromedriver'
 #default download location for chrome
 downdir = '/home/ecarrera/Downloads'
 #user email and ID
 userEmail = "ecarrera@usfq.edu.ec"
 userID = "183"
+hubi_report_filename = "reporte.xls"
+#Right now the report comes as
+#['ID', 'Año', 'Producto Académico', 'Título', 'Autor', 'Tipo de Autor', 'Colegio', 'Scopus', 'LatinIndex', 'Creador', 'Revista ISSN', 'Volumen', 'Número', 'Rango de Páginas', 'Doi\n']
+#this indexing is very prompt to change
+ID_idx = 0
+Titulo_idx = 3
+Doi_idx = 14
 
 #needed urls
 indexPageURL = 'https://evaluaciones.usfq.edu.ec/hubi/index.php'
-mainPageURL = 'https://evaluaciones.usfq.edu.ec/hubi/mainpage.php'
-mainPHPURL = 'https://evaluaciones.usfq.edu.ec/hubi/mainpage_apps.php'
-mainPubsURL = 'https://evaluaciones.usfq.edu.ec/hubi/publicaciones/index.php'
+#mainPageURL = 'https://evaluaciones.usfq.edu.ec/hubi/mainpage.php'
+#mainPHPURL = 'https://evaluaciones.usfq.edu.ec/hubi/mainpage_apps.php'
+#mainPubsURL = 'https://evaluaciones.usfq.edu.ec/hubi/publicaciones/index.php'
 
-pubsURL = 'https://evaluaciones.usfq.edu.ec/hubi/publicaciones/admin/autores_publicaciones.php?autor_id='+userID
-thePubURL = 'https://evaluaciones.usfq.edu.ec/hubi/publicaciones/admin/publicaciones_datos.php?publicacion_id='
+#pubsURL = 'https://evaluaciones.usfq.edu.ec/hubi/publicaciones/admin/autores_publicaciones.php?autor_id='+userID
+#thePubURL = 'https://evaluaciones.usfq.edu.ec/hubi/publicaciones/admin/publicaciones_datos.php?publicacion_id='
 basicInspireURL = 'https://inspirehep.net/literature?sort=mostrecent&size=25&page=1&q=a%20E.Carrera.Jarrin.1%20and%20tc%20p%20and%20date%20'
 #interesting fields list
 
@@ -164,7 +177,7 @@ def compare_publication_titles(dictOne,dictTwo):
     titleOne = dictOne['title'].replace('\n',' ')
     #print "The ratio between "+titleOne+"\n"
     for pubTwo in dictTwo:
-        titleTwo = dictTwo[pubTwo]['publicacion_titulo'].replace('\n',' ')
+        titleTwo = dictTwo[pubTwo]['Title'].replace('\n',' ')
         theratio = SequenceMatcher(None, titleOne, titleTwo).ratio()
         #print "\t *****AND**** "+titleTwo+" is ^^^"+str(theratio)
         if (theratio>0.9):
@@ -245,6 +258,39 @@ def get_password():
      thePass = getpass.getpass()
      return thePass
 
+#######################################################
+def get_hubi_report_dictionary():
+#######################################################
+    #make sure report file exists
+    #for now, this file needs to be downloaded first
+    os.path.exists(hubi_report_filename)
+    #convert to csv
+    os.system("unoconv -f csv "+ hubi_report_filename)
+    #check that the csv was obtained
+    hubi_report_csv = os.path.splitext(hubi_report_filename)[0]+'.csv'
+    os.path.exists(hubi_report_csv)
+
+    #print (hubi_report_csv)
+
+    hubiDict = {}
+
+    #read report file line by line and construct dictionary
+    thefile = open(hubi_report_csv,'r')
+    reader = csv.reader(thefile)
+    firstrow = True
+    for row in reader:
+        if firstrow:
+            firstrow = False
+            continue
+        #print (row)
+        #print (len(row))
+        #print (row[ID_idx]+" "+row[Titulo_idx]+ " "+row[Doi_idx])
+        theid = row[ID_idx]
+        thetitle = row[Titulo_idx]
+        thedoi = row[Doi_idx]
+        hubiDict[theid]={"Title":thetitle,"Doi":thedoi}
+        
+    return hubiDict
 
 #######################################################
 def get_hubi_pubs_ids(theDriver):
@@ -325,8 +371,8 @@ def scrape_the_hubi(theDriver):
 def get_hubi_publication_dictionary():
 #######################################################
 
-     s=Service(ChromeDriverManager().install())
-     driver = webdriver.Chrome(service=s)
+     #s=Service()
+     driver = webdriver.Chrome(ChromeDriverManager().install())
      #sign in hubi
      driver.get(indexPageURL)
      userEl = driver.find_element_by_id('usuario')
@@ -340,18 +386,17 @@ def get_hubi_publication_dictionary():
      print (driver.current_url)
      assert driver.current_url == mainPageURL
 
-     exit(0)
      
      #make sure you get access to the publications list
-     driver.get(mainPHPURL)
-     print (driver.current_url)
-     driver.get(mainPubsURL)
-     print (driver.current_url)
-     driver.get(pubsURL)
-     print (driver.current_url)
+     #driver.get(mainPHPURL)
+     #print (driver.current_url)
+     #driver.get(mainPubsURL)
+     #print (driver.current_url)
+     #driver.get(pubsURL)
+     #print (driver.current_url)
      
      #get the hubi publications dictionary
-     pubsDict = scrape_the_hubi(driver)
+     #pubsDict = scrape_the_hubi(driver)
      #driver.save_screenshot('screen.png')
      driver.quit()
      return pubsDict
@@ -364,7 +409,8 @@ def get_inspire_publication_dictionary(dicOpt):
     theyear = dicOpt['jyear']
     fString = basicInspireURL+str(theyear)
     print ("Search string: "+fString)
-    driver = webdriver.Chrome(cromedriverloc)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
+    #go to inspire
     driver.get(fString)
     sleep(10)
     citeEl = driver.find_element_by_xpath("//button[@class='ant-btn ant-dropdown-trigger']")
@@ -441,8 +487,9 @@ if __name__ =='__main__':
         cvs_up_title = 'toupload_publications.csv'
 
     #get the cvs files
-    print ("------- Getting the most current USFQ HUBI publications ...")
-    hubiDict = get_hubi_publication_dictionary()
+    #print ("------- Getting the most current USFQ HUBI publications ...")
+    #hubiDict = get_hubi_publication_dictionary()
+    hubiDict = get_hubi_report_dictionary()
     print_csv_file(hubiDict, "hubi_publications.csv")
     
     print ("------- Getting the requested inspire publications ...")
